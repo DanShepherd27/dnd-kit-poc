@@ -12,7 +12,12 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import * as S from "./Board.styled";
 import { closestCorners, pointerWithin } from "@dnd-kit/core/dist/index";
 
-export const Board = ({ children, handleDragEnd, handleDragOver }) => {
+export const Board = ({
+  children,
+  handleDragStart,
+  handleDragEnd,
+  handleDragOver,
+}) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -25,6 +30,8 @@ export const Board = ({ children, handleDragEnd, handleDragOver }) => {
       <DndContext
         sensors={sensors}
         collisionDetection={pointerWithin}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         {children}

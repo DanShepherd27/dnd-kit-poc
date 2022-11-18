@@ -37,7 +37,11 @@ export const App = () => {
   console.log(boardData);
 
   return (
-    <Board handleDragEnd={handleDragEnd} handleDragOver={handleDragOver}>
+    <Board
+      handleDragEnd={handleDragEnd}
+      handleDragOver={handleDragOver}
+      handleDragStart={handleDragStart}
+    >
       {boardData.map((column, index) => (
         <Column id={"column-" + index} items={column} key={index} />
       ))}
