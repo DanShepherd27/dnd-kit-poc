@@ -11,7 +11,7 @@ export const App = () => {
     [
       { id: "card-0", type: "card", title: "card-0" },
       {
-        id: "group-1",
+        id: "group-0",
         type: "group",
         groupName: "Group 0",
         items: [
@@ -52,32 +52,81 @@ export const App = () => {
   function handleDragStart(event) {
     const { active } = event;
     const { id } = active;
-
     setActiveId(id);
   }
 
   function handleDragEnd(event) {
-    const { active, over } = event;
+    // const { active, over } = event;
+    const { over } = event;
+    // if item is dragged to "nowhere"
+    if (over === null) return;
 
-    if (active.id !== over.id) {
+    if (activeId !== over.id) {
+      console.log("ACTIVE: ", activeId, " OVER: ", over);
+      const [columnFrom, groupFrom] = findItem(activeId);
+      const [columnTo, groupTo] = findItem(over.id);
+
       const newBoardData = boardData;
-      let columnToChange = newBoardData[newBoardData.indexOf(active.id)];
-      columnToChange = arrayMove(
-        columnToChange,
-        columnToChange.indexOf(active.id),
-        columnToChange.indexOf(over.id)
-      );
-
+      // if we move inside one column, do the move (otherwise the handleDragOver will handle it)
+      console.log(columnFrom, columnTo);
+      if (columnFrom === columnTo) {
+        if (groupFrom !== undefined && groupFrom === groupTo) {
+          const group = newBoardData[columnFrom][groupFrom];
+          console.log("GROUP ITEMS (before): ", group.items);
+          const oldItem = group.items.find((i) => i.id === activeId);
+          const oldIndex = group.items.indexOf(oldItem);
+          const newItem = group.items.find((i) => i.id === over.id);
+          const newIndex = group.items.indexOf(newItem);
+          group.items = arrayMove(group.items, oldIndex, newIndex);
+          console.log("GROUP ITEMS (after): ", group.items);
+        }
+      }
+      console.log(newBoardData);
       setBoardData(newBoardData);
-      // setBoardData((cards) => {
-      //   const oldIndex = cards[0].indexOf(active.id);
-      //   const newIndex = cards[0].indexOf(over.id);
-      //   // return arrayMove(cards[0], oldIndex, newIndex);
-      //   return cards[0];
-      // });
+      setActiveId(undefined);
     }
+  }
 
-    console.log("ACTIVE: ", active, " OVER: ", over);
+  /**
+   * Helper function for handleDragEnd to find place of an item inside the board data.
+   *
+   * @param {string} itemId id of the item we are looking for.
+   * @return {Array[2]} An array containing [colunIndex, groupIndex]. If a group or column wasn't found, returns undefined values (if only columnIndex has a value, the item is not in a group).
+   * @see handleDragEnd, boardData
+   */
+  function findItem(itemId) {
+    // find which column contains active item's id
+    let column; // index of column
+    let group; // index of group inside the column
+    for (let columnIndex = 0; columnIndex < boardData.length; columnIndex++) {
+      if (boardData[columnIndex].find((item) => item.id === itemId)) {
+        column = columnIndex;
+        break;
+      }
+      // if it wasn't on the first level of the column, it could be inside a group
+      for (
+        let itemIndex = 0;
+        itemIndex < boardData[columnIndex].length;
+        itemIndex++
+      ) {
+        if (
+          boardData[columnIndex][itemIndex].type === "group" &&
+          boardData[columnIndex][itemIndex].items.find(
+            (groupedItem) => groupedItem.id === itemId
+          )
+        ) {
+          // if active item is found inside current group
+          // save group index
+          column = columnIndex;
+          group = itemIndex;
+          break;
+        }
+      }
+      // if active item was found in a group, don't look for it in other columns
+      if (group) break;
+    }
+    console.log("findItem results for ", itemId, " are: ", [column, group]);
+    return [column, group];
   }
 
   function handleDragOver(event) {
