@@ -70,18 +70,47 @@ export const App = () => {
       // if we move inside one column, do the move (otherwise the handleDragOver will handle it)
       console.log(columnFrom, columnTo);
       if (columnFrom === columnTo) {
-        if (groupFrom !== undefined && groupFrom === groupTo) {
+        // if active item is not in a group
+        if (groupFrom === undefined) {
+          let destinationColumn = newBoardData[columnTo];
+          const oldItem = destinationColumn.find((i) => i.id === activeId);
+          const oldIndex = destinationColumn.indexOf(oldItem);
+
+          // and destination (over) is also not a group
+          if (groupTo === undefined) {
+            console.log("BASIC MOVE");
+            // do a basic replacement
+            const newItem = destinationColumn.find((i) => i.id === over.id);
+            const newIndex = destinationColumn.indexOf(newItem);
+            newBoardData[columnTo] = arrayMove(
+              destinationColumn,
+              oldIndex,
+              newIndex
+            );
+          }
+          // otherwise put in the appropriate group
+          else {
+            console.log("PUTTING ITEM INTO GROUP FROM OUTSIDE");
+            const group = newBoardData[columnTo][groupTo];
+            const newItem = group.items.find((i) => i.id === over.id);
+            const newIndex = group.items.indexOf(newItem);
+            // add active item to group
+            group.items.splice(newIndex, 0, oldItem);
+            // remove active item from its old place
+            newBoardData[columnFrom].splice(oldIndex, 1);
+          }
+        } else if (groupFrom !== undefined && groupFrom === groupTo) {
+          console.log("MOVE ITEM INSIDE GROUP");
           const group = newBoardData[columnFrom][groupFrom];
-          console.log("GROUP ITEMS (before): ", group.items);
           const oldItem = group.items.find((i) => i.id === activeId);
           const oldIndex = group.items.indexOf(oldItem);
           const newItem = group.items.find((i) => i.id === over.id);
           const newIndex = group.items.indexOf(newItem);
           group.items = arrayMove(group.items, oldIndex, newIndex);
-          console.log("GROUP ITEMS (after): ", group.items);
+          // for later: if active item type is group, don't move inside, but merge with destination group
         }
       }
-      console.log(newBoardData);
+      console.log("NEW BOARD DATA: ", newBoardData);
       setBoardData(newBoardData);
       setActiveId(undefined);
     }
