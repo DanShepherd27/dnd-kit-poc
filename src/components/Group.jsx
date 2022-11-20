@@ -16,7 +16,7 @@ export const Group = ({ groupName, id, cards }) => {
 
   return (
     <S.Group ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <p>{groupName}</p>
+      <p>{`${groupName} (${cards.length})`}</p>
       {/* <SortableContext items={cards}> */}
       {cards.map((card) => (
         <Card id={card.id} key={card.id}>
