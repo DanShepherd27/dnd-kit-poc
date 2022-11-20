@@ -72,9 +72,9 @@ export const App = () => {
       const [columnFrom, groupFrom] = findItem(activeId);
       const [columnTo, groupTo] = findItem(over.id);
 
-      const newBoardData = boardData;
       // if we move inside one column, do the move (otherwise the handleDragOver will handle it)
       if (columnFrom === columnTo) {
+        const newBoardData = boardData;
         // if active item source is not a group
         if (groupFrom === undefined) {
           let destinationColumn = newBoardData[columnTo];
@@ -155,19 +155,65 @@ export const App = () => {
             newBoardData[columnFrom].splice(emptyGroupIndex, 1);
           }
         }
+        console.log("NEW BOARD DATA: ", newBoardData);
+        setBoardData(newBoardData);
       }
-      console.log("NEW BOARD DATA: ", newBoardData);
-      setBoardData(newBoardData);
       setActiveId(undefined);
     }
   }
 
+  function handleDragOver(event) {
+    const { active, over } = event;
+    // if item is dragged to "nowhere"
+    if (over === null) return;
+
+    if (activeId !== over.id) {
+      console.log("ACTIVE: ", active, " OVER: ", over);
+      const [columnFrom, groupFrom] = findItem(active.id);
+      const [columnTo, groupTo] = findItem(over.id);
+
+      // if current columnId different than destination columnId, move active item to new column array (would be nicer to store everything in one column and just modify a columnId prop)
+      if (columnFrom !== columnTo) {
+        const newBoardData = boardData;
+
+        const sourceContainer =
+          groupFrom !== undefined
+            ? newBoardData[columnFrom][groupFrom].items
+            : newBoardData[columnFrom];
+        const destinationContainer =
+          groupTo !== undefined
+            ? newBoardData[columnTo][groupTo].items
+            : newBoardData[columnTo];
+
+        console.log(
+          "sourceContainer: ",
+          sourceContainer,
+          " destinationContainer: ",
+          destinationContainer
+        );
+
+        const oldItem = sourceContainer.find((i) => i.id === activeId);
+        const oldIndex = sourceContainer.indexOf(oldItem);
+
+        // const overItem = over;
+        const overItem = destinationContainer.find((i) => i.id === over.id);
+        const overIndex = destinationContainer.indexOf(overItem);
+
+        destinationContainer.splice(overIndex, 0, oldItem);
+        sourceContainer.splice(oldIndex, 1);
+
+        console.log("NEW BOARD DATA: ", newBoardData);
+        setBoardData(newBoardData);
+      }
+    }
+  }
+
   /**
-   * Helper function for handleDragEnd to find place of an item inside the board data.
+   * Helper function for handleDragEnd and handleDragOver to find place of an item inside the board data.
    *
    * @param {string} itemId id of the item we are looking for.
    * @return {Array[2]} An array containing [colunIndex, groupIndex]. If a group or column wasn't found, returns undefined values (if only columnIndex has a value, the item is not in a group).
-   * @see handleDragEnd, boardData
+   * @see handleDragEnd, handleDragOver, boardData
    */
   function findItem(itemId) {
     // find which column contains active item's id
@@ -202,13 +248,5 @@ export const App = () => {
     }
     console.log("findItem results for ", itemId, " are: ", [column, group]);
     return [column, group];
-  }
-
-  function handleDragOver(event) {
-    const { active, over } = event;
-
-    // if current columnId different than destination columnId, move active item to new column array (would be nicer to store everything in one column and just modify a columnId prop)
-    // if (active.id.split(0, 1) !== over.id.split(0, 1)) {
-    // }
   }
 };
