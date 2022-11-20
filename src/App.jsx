@@ -21,6 +21,12 @@ export const App = () => {
         ],
       },
       { id: "card-4", type: "card", title: "card-4" },
+      {
+        id: "group-1",
+        type: "group",
+        groupName: "Group 1",
+        items: [{ id: "card-9", type: "card", title: "card-9" }],
+      },
       { id: "card-5", type: "card", title: "card-5" },
     ],
     [
@@ -68,15 +74,14 @@ export const App = () => {
 
       const newBoardData = boardData;
       // if we move inside one column, do the move (otherwise the handleDragOver will handle it)
-      console.log(columnFrom, columnTo);
       if (columnFrom === columnTo) {
-        // if active item is not in a group
+        // if active item source is not a group
         if (groupFrom === undefined) {
           let destinationColumn = newBoardData[columnTo];
           const oldItem = destinationColumn.find((i) => i.id === activeId);
           const oldIndex = destinationColumn.indexOf(oldItem);
 
-          // and destination (over) is also not a group
+          // and active item destination (over's container) is also not a group
           if (groupTo === undefined) {
             console.log("BASIC MOVE");
             // do a basic replacement
@@ -88,7 +93,7 @@ export const App = () => {
               newIndex
             );
           }
-          // otherwise put in the appropriate group
+          // otherwise put active item in the appropriate group
           else {
             console.log("PUTTING ITEM INTO GROUP FROM OUTSIDE");
             const group = newBoardData[columnTo][groupTo];
@@ -99,15 +104,56 @@ export const App = () => {
             // remove active item from its old place
             newBoardData[columnFrom].splice(oldIndex, 1);
           }
-        } else if (groupFrom !== undefined && groupFrom === groupTo) {
-          console.log("MOVE ITEM INSIDE GROUP");
-          const group = newBoardData[columnFrom][groupFrom];
-          const oldItem = group.items.find((i) => i.id === activeId);
-          const oldIndex = group.items.indexOf(oldItem);
-          const newItem = group.items.find((i) => i.id === over.id);
-          const newIndex = group.items.indexOf(newItem);
-          group.items = arrayMove(group.items, oldIndex, newIndex);
-          // for later: if active item type is group, don't move inside, but merge with destination group
+          // if active item source is a group
+        } else {
+          const sourceGroup = newBoardData[columnFrom][groupFrom];
+          const oldItem = sourceGroup.items.find((i) => i.id === activeId);
+          const oldIndex = sourceGroup.items.indexOf(oldItem);
+
+          // and active item destination is also a group
+          if (groupTo !== undefined) {
+            // for later: if type of source (active) item is group, don't move inside, but merge with destination group
+
+            const destinationGroup = newBoardData[columnTo][groupTo];
+            const newItem = destinationGroup.items.find(
+              (i) => i.id === over.id
+            );
+            const newIndex = destinationGroup.items.indexOf(newItem);
+
+            // source and destination are the same group
+            if (groupFrom === groupTo) {
+              console.log("MOVE ITEM INSIDE GROUP");
+              destinationGroup.items = arrayMove(
+                destinationGroup.items,
+                oldIndex,
+                newIndex
+              );
+            } else {
+              console.log("MOVE ITEM BETWEEN DIFFERENT GROUPS");
+              destinationGroup.items.splice(newIndex, 0, oldItem);
+              sourceGroup.items.splice(oldIndex, 1);
+            }
+          }
+          // but active item destination is not a group
+          else {
+            console.log("MOVE ITEM OUTSIDE OF ITS GROUP");
+            const newItem = newBoardData[columnTo].find(
+              (i) => i.id === over.id
+            );
+            const newIndex = newBoardData[columnTo].indexOf(newItem);
+            newBoardData[columnTo].splice(newIndex, 0, oldItem);
+            sourceGroup.items.splice(oldIndex, 1);
+          }
+
+          // remove empty group (if there is one)
+          const emptyGroup = newBoardData[columnFrom].find(
+            (i) => i.type === "group" && i.items.length === 0
+          );
+          if (emptyGroup) {
+            const emptyGroupIndex =
+              newBoardData[columnFrom].indexOf(emptyGroup);
+            newBoardData[columnFrom].splice(emptyGroupIndex, 1);
+          }
         }
       }
       console.log("NEW BOARD DATA: ", newBoardData);
