@@ -195,7 +195,10 @@ export const App = () => {
         }
         // group dragged over grouped item -> merge
         else if (oldItem.type === "group" && groupTo !== undefined) {
-          destinationContainer = [...destinationContainer, ...oldItem.items];
+          newBoardData[columnTo][groupTo].items = [
+            ...destinationContainer,
+            ...oldItem.items,
+          ];
         }
         // basic card movement
         else {
