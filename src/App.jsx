@@ -33,7 +33,32 @@ export const App = () => {
       { id: "card-6", type: "card", title: "card-6" },
       { id: "card-7", type: "card", title: "card-7" },
     ],
-    [],
+    [
+      {
+        id: "group-2",
+        type: "group",
+        groupName: "Group 2",
+
+        items: [
+          { id: "card-10", type: "card", title: "card-10" },
+          {
+            id: "group-3",
+            type: "group",
+            groupName: "Group 3",
+            items: [
+              { id: "card-10", type: "card", title: "card-10" },
+              { id: "card-11", type: "card", title: "card-11" },
+            ],
+          },
+          {
+            id: "group-4",
+            type: "group",
+            groupName: "Group 4",
+            items: [{ id: "card-12", type: "card", title: "card-12" }],
+          },
+        ],
+      },
+    ],
     [{ id: "card-8", type: "card", title: "card-8" }],
   ]);
 

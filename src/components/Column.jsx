@@ -22,7 +22,7 @@ export const Column = ({ items, id }) => {
             <Group
               id={item.id}
               key={item.id}
-              cards={item.items}
+              items={item.items}
               groupName={item.groupName}
             />
           )

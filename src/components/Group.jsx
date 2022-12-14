@@ -5,7 +5,7 @@ import * as S from "./Group.styled";
 import { Card } from "./Card";
 import { SortableContext } from "@dnd-kit/sortable/dist/index";
 
-export const Group = ({ groupName, id, cards }) => {
+export const Group = ({ groupName, id, items }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: id });
 
@@ -16,14 +16,22 @@ export const Group = ({ groupName, id, cards }) => {
 
   return (
     <S.Group ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <p>{`${groupName} (${cards.length})`}</p>
-      {/* <SortableContext items={cards}> */}
-      {cards.map((card) => (
-        <Card id={card.id} key={card.id}>
-          {card.title}
-        </Card>
-      ))}
-      {/* </SortableContext> */}
+      <p>{`${groupName} (${items.length})`}</p>
+
+      {items.map((item) =>
+        item.type === "card" ? (
+          <Card id={item.id} key={item.id}>
+            {item.title}
+          </Card>
+        ) : (
+          <Group
+            id={item.id}
+            key={item.id}
+            items={item.items}
+            groupName={item.groupName}
+          />
+        )
+      )}
     </S.Group>
   );
 };
